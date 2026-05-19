@@ -1,6 +1,8 @@
 name: Check US Visa Slots
 
 on:
+  push:
+    branches: [master]
   schedule:
     # Runs every 30 minutes
     - cron: '*/30 * * * *'
