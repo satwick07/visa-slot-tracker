@@ -1,0 +1,11 @@
+# Never commit secrets
+config_secrets.py
+
+# Cache file (managed by GitHub Actions cache)
+seen_messages.json
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+.env

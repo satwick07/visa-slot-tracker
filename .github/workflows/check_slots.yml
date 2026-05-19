@@ -1,0 +1,48 @@
+name: Check US Visa Slots
+
+on:
+  schedule:
+    # Runs every 30 minutes
+    - cron: '*/30 * * * *'
+  workflow_dispatch: # Allows manual trigger from GitHub UI
+
+jobs:
+  check-slots:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Restore seen messages cache
+        uses: actions/cache@v4
+        with:
+          path: seen_messages.json
+          key: seen-messages-${{ github.run_id }}
+          restore-keys: |
+            seen-messages-
+
+      - name: Create config with secrets
+        run: |
+          cat > config_secrets.py << 'EOF'
+          TELEGRAM_BOT_TOKEN = "${{ secrets.TELEGRAM_BOT_TOKEN }}"
+          TELEGRAM_CHAT_ID = "${{ secrets.TELEGRAM_CHAT_ID }}"
+          EOF
+
+      - name: Run slot checker
+        env:
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+        run: python tracker.py --once
+
+      - name: Save seen messages cache
+        if: always()
+        uses: actions/cache/save@v4
+        with:
+          path: seen_messages.json
+          key: seen-messages-${{ github.run_id }}
